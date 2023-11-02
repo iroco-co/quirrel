@@ -1,12 +1,11 @@
-import cronParser from "cron-parser";
+import * as cronMatcher from '@datasert/cronjs-matcher';
 
-export function isValidTimezone(tz: string) {
+export function isValidTimezone(timezone: string) {
   try {
-    const expr = cronParser.parseExpression("* * * * *", {
-      tz,
+    const futureMatches = cronMatcher.getFutureMatches("* * * * *", {
+      timezone,
     });
-    expr.next();
-    return true;
+    return futureMatches.length > 0;
   } catch (error) {
     return false;
   }
@@ -28,15 +27,13 @@ export function parseTimezonedCron(
 }
 
 export function cron(lastDate: Date, cronExpression: string): Date {
-  const [cron, tz] = parseTimezonedCron(cronExpression);
-  const expr = cronParser.parseExpression(cron, {
-    currentDate: lastDate,
-    tz,
+  const [cron, timezone] = parseTimezonedCron(cronExpression);
+  const futureMatches = cronMatcher.getFutureMatches(cron, {
+    startAt: lastDate.toISOString(),
+    timezone,
   });
 
-  const nextExecution = expr.next().toDate();
-
-  return nextExecution;
+  return new Date(futureMatches[0]);
 }
 
 export function every(lastDate: Date, scheduleMeta: string): Date {

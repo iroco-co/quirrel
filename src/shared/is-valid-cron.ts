@@ -1,8 +1,8 @@
-import CronParser from "cron-parser";
+import {parse} from "@datasert/cronjs-parser";
 
 export function isValidCronExpression(cron: string) {
   try {
-    CronParser.parseExpression(cron);
+    parse(cron)
     return true;
   } catch (error) {
     return false;
